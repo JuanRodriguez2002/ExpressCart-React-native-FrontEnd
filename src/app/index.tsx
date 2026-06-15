@@ -1,6 +1,8 @@
+import FormAlerts from "@/components/UI/FormAlerts";
+import { useAuth } from "@/context/AuthContext";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,17 +16,62 @@ import {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { loginUser } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Control visual de carga
 
-  const handleLogin = () => {
+  const [loginErrors, setLoginErrors] = useState<string[]>([]);
+  const [loginSuccess, setLoginSuccess] = useState<string | null>(null);
+
+  // --- EFECTO PARA LIMPIAR ALERTAS A LOS 5 SEGUNDOS ---
+  useEffect(() => {
+    if (loginErrors || loginSuccess) {
+      const timer = setTimeout(() => {
+        setLoginErrors([]);
+        setLoginSuccess(null);
+      }, 5000); // 5000 milisegundos = 5 segundos
+
+      return () => clearTimeout(timer); // Limpia el timer si el componente se desmonta o cambia el estado
+    }
+  }, [loginErrors, loginSuccess]);
+
+  const handleLogin = async () => {
+    if (loading) return;
+    // Resetear alertas previas antes de validar
+    setLoginErrors([]);
+    setLoginSuccess(null);
+
+    const erroresEncontrados: string[] = [];
     if (!email || !password) {
-      alert("Por favor, completa todos los campos.");
-      return;
+      erroresEncontrados.push("completa todos los campos obligatorios.");
     }
 
-    // Activa esto para que salte a la nueva pantalla
-    router.replace("/home");
+    if (erroresEncontrados.length > 0) {
+      // Unimos todos los errores con un salto de línea (\n) para mostrarlos en lista
+      setLoginErrors(erroresEncontrados);
+      return; // Detiene el flujo si hay inconvenientes
+    }
+    setLoading(true);
+    try {
+      // Disparamos la petición al flujo global (cifra los datos y valida el rol)
+      await loginUser({
+        email: email.trim(),
+        password: password,
+      });
+
+      setLoginSuccess("¡Inicio de sesión correcto! Entrando...");
+
+      setTimeout(() => {
+        router.replace("/home");
+      }, 1500);
+    } catch (error: any) {
+      // Capturamos cualquier error controlado lanzado por el backend o el filtro de rol
+      setLoginErrors([error.message || "No se pudo conectar al servidor."]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,7 +96,7 @@ export default function LoginScreen() {
           <Text style={styles.instructionText}>
             Ingresa tus credenciales para continuar.
           </Text>
-
+          <FormAlerts errors={loginErrors} success={loginSuccess} />
           {/* Input de Correo */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Correo Electrónico</Text>
@@ -78,7 +125,11 @@ export default function LoginScreen() {
           </View>
 
           {/* Olvidé mi contraseña */}
-          <TouchableOpacity style={styles.forgotButton}>
+          <TouchableOpacity
+            style={styles.forgotButton}
+            activeOpacity={0.7}
+            onPress={() => router.push("/forgot-password")}
+          >
             <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
 
@@ -88,7 +139,11 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           {/* Registro */}
-          <TouchableOpacity style={styles.registerButton}>
+          <TouchableOpacity
+            style={styles.registerButton}
+            activeOpacity={0.7}
+            onPress={() => router.push("/register")}
+          >
             <Text style={styles.registerText}>
               ¿No tienes cuenta?{" "}
               <Text style={styles.registerTextBold}>Regístrate</Text>

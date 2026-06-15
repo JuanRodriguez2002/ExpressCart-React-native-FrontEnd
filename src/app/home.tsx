@@ -1,15 +1,23 @@
+import FormAlerts from "@/components/UI/FormAlerts";
+import { tokenStorage } from "@/utils/storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    FlatList,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Header from "../components/common/Header";
+import { authService, UserProfile } from "../services/authService";
+import {
+  Supermarket,
+  supermarketService,
+} from "../services/supermarketService";
 
 // Datos estáticos de prueba para las tarjetas de supermercados
 const SUPERMERCADOS_RECIENTES = [
@@ -35,51 +43,104 @@ const SUPERMERCADOS_RECIENTES = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [menuAbierto, setMenuAbierto] = useState(false);
 
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [supermarkets, setSupermarkets] = useState<Supermarket[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setErrorMessages([]);
+      // 1. Primero recuperamos el token almacenado de forma segura en el dispositivo
+      const token = await tokenStorage.getToken();
+
+      if (!token) {
+        throw new Error(
+          "No se encontró una sesión activa. Por favor, inicia sesión.",
+        );
+      }
+      const [supermarketData, userData] = await Promise.all([
+        supermarketService.getAll(),
+        authService.getUserProfile(token),
+      ]);
+      setSupermarkets(supermarketData);
+      setUser(userData);
+    } catch (error: any) {
+      setErrorMessages([
+        error.message || "No se pudieron cargar los supermercados.",
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
   // Render para cada tarjeta de supermercado
-  const renderItem = ({
-    item,
-  }: {
-    item: (typeof SUPERMERCADOS_RECIENTES)[0];
-  }) => (
+  const renderItem = ({ item }: { item: Supermarket }) => (
     <View style={styles.card}>
       <View style={styles.cardIconContainer}>
         <Text style={styles.cardIcon}>🛒</Text>
       </View>
       <View style={styles.cardContent}>
-        <Text style={styles.cardNombre}>{item.nombre}</Text>
-        <Text style={styles.cardSucursal}>{item.sucursal}</Text>
-        <Text style={styles.cardFecha}>Última visita: {item.fecha}</Text>
+        <Text style={styles.cardNombre}>{item.name}</Text>
+        <Text style={styles.cardSucursal}>{item.address}</Text>
+        {/* <Text style={styles.cardFecha}>Última visita: {item.fecha}</Text> */}
       </View>
-      <TouchableOpacity style={styles.cardButton}>
+      <TouchableOpacity
+        style={styles.cardButton}
+        onPress={() =>
+          router.push({
+            pathname: "/",
+            //params: { id: item.id },
+          })
+        }
+      >
         <Text style={styles.cardButtonText}>Entrar</Text>
       </TouchableOpacity>
     </View>
   );
-
+  const nombreCompleto = user ? `${user.name}`.trim() : "Usuario";
   return (
     <View style={styles.container}>
-      <Header />
+      <Header userName={nombreCompleto} />
 
       {/* --- CONTENIDO PRINCIPAL --- */}
       <ScrollView contentContainerStyle={styles.mainContent}>
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>¡Hola, Juan Rodríguez!</Text>
+          <Text style={styles.welcomeTitle}>¡Hola, {nombreCompleto}!</Text>
           <Text style={styles.welcomeSubtitle}>
             ¿Qué supermercado visitaremos hoy?
           </Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Últimos supermercados visitados</Text>
+        <Text style={styles.sectionTitle}>Nuestros SuperMercados</Text>
+        <FormAlerts errors={errorMessages} success={null} />
 
-        {/* Usamos FlatList de manera estática para renderizar las tarjetas de forma óptima */}
-        <FlatList
-          data={SUPERMERCADOS_RECIENTES}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false} // Desactivado porque el scroll general lo maneja el ScrollView
-        />
+        {loading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#004B32" />
+            <Text style={styles.loaderText}>Buscando establecimientos...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={supermarkets}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false} // El scroll nativo lo sigue manejando el ScrollView padre
+            ListEmptyComponent={
+              errorMessages.length === 0 ? (
+                <Text style={styles.emptyText}>
+                  No hay supermercados registrados en este momento.
+                </Text>
+              ) : null
+            }
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -277,5 +338,21 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#E2E8E5",
     marginVertical: 15,
+  },
+
+  loaderContainer: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+  loaderText: {
+    marginTop: 10,
+    color: "#6A7C75",
+    fontSize: 14,
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#6A7C75",
+    marginTop: 20,
+    fontSize: 14,
   },
 });
