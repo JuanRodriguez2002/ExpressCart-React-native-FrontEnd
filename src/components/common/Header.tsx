@@ -10,11 +10,25 @@ import {
 
 interface HeaderProps {
   titulo?: string;
+  userName?: string; //
 }
 
-export default function Header({ titulo = "ExpressCart" }: HeaderProps) {
+export default function Header({
+  titulo = "ExpressCart",
+  userName,
+}: HeaderProps) {
   const router = useRouter();
   const [menuAbierto, setMenuAbierto] = useState(false);
+
+  // 🛠️ Función para calcular las iniciales dinámicamente
+  const obtenerIniciales = (nombre?: string) => {
+    if (!nombre) return "??";
+    const partes = nombre.trim().split(/\s+/);
+    if (partes.length >= 2) {
+      return `${partes[0][0]}${partes[1][0]}`.toUpperCase();
+    }
+    return partes[0].substring(0, 2).toUpperCase();
+  };
 
   return (
     <>
@@ -32,7 +46,7 @@ export default function Header({ titulo = "ExpressCart" }: HeaderProps) {
         <Text style={styles.brandName}>{titulo}</Text>
 
         <View style={styles.userBadge}>
-          <Text style={styles.userBadgeText}>JR</Text>
+          <Text style={styles.userBadgeText}>{obtenerIniciales(userName)}</Text>
         </View>
       </View>
 
