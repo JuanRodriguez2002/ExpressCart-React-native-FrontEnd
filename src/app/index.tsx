@@ -48,6 +48,9 @@ export default function LoginScreen() {
       erroresEncontrados.push("completa todos los campos obligatorios.");
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim().toLowerCase();
+
     if (erroresEncontrados.length > 0) {
       // Unimos todos los errores con un salto de línea (\n) para mostrarlos en lista
       setLoginErrors(erroresEncontrados);
@@ -57,8 +60,8 @@ export default function LoginScreen() {
     try {
       // Disparamos la petición al flujo global (cifra los datos y valida el rol)
       await loginUser({
-        email: email.trim(),
-        password: password,
+        email: cleanEmail.trim(),
+        password: cleanPassword,
       });
 
       setLoginSuccess("¡Inicio de sesión correcto! Entrando...");

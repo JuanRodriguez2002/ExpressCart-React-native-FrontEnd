@@ -1,4 +1,5 @@
-const BASE_URL = "http://192.168.1.10:5000/api";
+const BASE_URL =
+  "https://expresscart-nodejs-express-backend-production.up.railway.app/api";
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const url = `${BASE_URL}${endpoint}`;
