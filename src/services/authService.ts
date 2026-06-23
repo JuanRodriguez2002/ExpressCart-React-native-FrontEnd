@@ -8,7 +8,8 @@ export interface UserProfile {
   // Añade otros campos que devuelva tu req.user si es necesario
 }
 // Cambia 'localhost' por la IP de tu computadora o 10.0.2.2 si falla en Android
-const API_URL = "http://192.168.50.11:4000/api";
+const API_URL =
+  "https://expresscart-nodejs-express-backend-production.up.railway.app/api";
 
 export const authService = {
   /**

@@ -51,23 +51,33 @@ export default function RegisterScreen() {
     // Arreglo temporal para acumular los mensajes de error hallados
     const erroresEncontrados: string[] = [];
 
-    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+    // Formateamos las entradas a minúsculas y limpiamos espacios para validar correctamente
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.toLowerCase();
+    const cleanConfirmPassword = confirmPassword.toLowerCase();
+
+    if (
+      !name.trim() ||
+      !cleanEmail ||
+      !cleanPassword ||
+      !cleanConfirmPassword
+    ) {
       erroresEncontrados.push("completa todos los campos obligatorios.");
     }
 
     // Validación básica de correo electrónico
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(cleanEmail)) {
       erroresEncontrados.push("ingresa un correo electrónico válido.");
     }
 
-    if (password.length < 6) {
+    if (cleanPassword.length < 6) {
       erroresEncontrados.push(
         "La contraseña debe tener al menos 6 caracteres.",
       );
     }
 
-    if (password !== confirmPassword) {
+    if (cleanPassword !== cleanConfirmPassword) {
       erroresEncontrados.push("Las contraseñas ingresadas no coinciden.");
     }
 
@@ -80,11 +90,11 @@ export default function RegisterScreen() {
     setLoading(true);
     // Simulación futura de persistencia / API
     try {
-      // Consumimos el servicio real enviando los datos limpios
+      // Consumimos el servicio real enviando los datos limpios y en minúsculas
       await authService.createAccount({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: password,
+        name: name,
+        email: cleanEmail,
+        password: cleanPassword,
       });
 
       // Mensaje de éxito informando sobre el token enviado por tu backend
@@ -100,11 +110,16 @@ export default function RegisterScreen() {
         });
       }, 2500);
     } catch (error: any) {
+      console.log("entra");
       // Capturamos errores lógicos del servidor (ej: "El correo ya está en uso")
       setErrorMessages([
         error.message || "Ocurrió un problema al conectar con el servidor.",
       ]);
     } finally {
+      // Aseguramos restablecer los campos visuales a minúsculas para mantener la consistencia en la UI si falla
+      setEmail(cleanEmail);
+      setPassword(cleanPassword);
+      setConfirmPassword(cleanConfirmPassword);
       setLoading(false);
     }
   };

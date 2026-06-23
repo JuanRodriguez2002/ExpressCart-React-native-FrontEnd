@@ -81,7 +81,7 @@ export default function Header({
               style={styles.menuItem}
               onPress={() => {
                 setMenuAbierto(false);
-                router.push("/cart");
+                router.push("/orders");
               }}
             >
               <Text style={styles.menuItemIcon}>🛒</Text>

@@ -82,9 +82,9 @@ export default function HomeScreen() {
   }, []);
   // Render para cada tarjeta de supermercado
   const renderItem = ({ item }: { item: Supermarket }) => (
-    <View style={styles.card}>
+    <View style={styles.supermarketHeader}>
       <View style={styles.cardIconContainer}>
-        <Text style={styles.cardIcon}>🛒</Text>
+        <Text style={styles.cardIcon}>🏢</Text>
       </View>
       <View style={styles.cardContent}>
         <Text style={styles.cardNombre}>{item.name}</Text>
@@ -95,8 +95,8 @@ export default function HomeScreen() {
         style={styles.cardButton}
         onPress={() =>
           router.push({
-            pathname: "/",
-            //params: { id: item.id },
+            pathname: "/categories",
+            params: { id: item.id },
           })
         }
       >
@@ -215,6 +215,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+
+  supermarketHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 0,
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: "#004B32",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+    borderLeftWidth: 5,
+    borderLeftColor: "#00C252", // El verde brillante distintivo de ExpressCart
   },
   card: {
     backgroundColor: "#FFFFFF",
