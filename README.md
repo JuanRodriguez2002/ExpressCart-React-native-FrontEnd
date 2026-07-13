@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/assets/expresscart-logo.png" alt="ExpressCart Logo" width="220">
+  <img src="https://raw.githubusercontent.com/JuanRodriguez2002/ExpressCart-React-native-Frontend/assets/Logo_conF.png" alt="ExpressCart Logo" width="220">
 </p>
 
 <h1 align="center">ExpressCart — Aplicación Móvil (Clientes)</h1>
