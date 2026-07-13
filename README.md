@@ -1,75 +1,47 @@
-# ExpressCart - Frontend Application
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JuanRodriguez2002/ExpressCart-React-native-FrontEnd/assets/Logo_conF.png" alt="ExpressCart Logo" width="220">
+</p>
 
-## 📱 Descripción General
-ExpressCart Frontend es una aplicación móvil nativa multiplataforma diseñada para optimizar y agilizar las compras en supermercados. Permite a los usuarios seleccionar establecimientos locales, gestionar su carrito de compras en tiempo real y sincronizar sus datos de perfil de manera segura. Desarrollada con **React Native** y **Expo Router**, la aplicación implementa una arquitectura desacoplada basada en el patrón **MVVM (Model-View-ViewModel)** y un sistema de navegación híbrido sofisticado.
+<h1 align="center">ExpressCart — Aplicación Móvil (Clientes)</h1>
 
----
-
-## 🛠️ Stack Tecnológico
-* **Framework Principal:** React Native (con Expo SDK)
-* **Enrutamiento y Navegación:** Expo Router (File-based routing)
-* **Gestor de Dependencias:** pnpm (migrado desde npm para optimizar la seguridad y velocidad)
-* **Lenguaje:** TypeScript
-* **Estilos:** StyleSheet nativo de React Native
-* **Almacenamiento Local:** `SecureStore` / AsyncStorage personalizado (`tokenStorage`)
+<p align="center">
+  <a href="https://drive.google.com/file/d/1kDWpfMAEU_-ODZfS0nrJ6Ca97g7a-rHg/view?usp=drivesdk" target="_blank">
+    <img src="https://img.shields.io/badge/Descargar%20APK-Google%20Drive-green?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK">
+  </a>
+</p>
 
 ---
 
-## 📐 Arquitectura y Patrones de Diseño
+## 📱 ¿Qué es ExpressCart?
 
-### 1. Patrón de Navegación: Combinación (Stack + Drawer)
-La aplicación organiza sus flujos de pantallas utilizando un enfoque híbrido:
-* **Stack Navigation:** Es la fundación provista por Expo Router. Controla las transiciones lineales del ciclo de vida de la app (ej. redirección inmediata desde el login hacia la pantalla de inicio mediante `router.replace("/")` o flujos de autenticación).
-* **Drawer Navigation (Menú Lateral):** Implementado mediante un componente personalizado `<Header />` con un panel lateral (`sidebar`) animado. Permite al usuario conmutar entre las vistas principales del sistema (`/home`, `/cart`, `/profile`, `/supermarkets`).
+**ExpressCart** es una aplicación móvil diseñada para cambiar y modernizar la forma en que compramos en los supermercados locales de Constanza. Olvídate de mandar largas listas de texto o notas de voz confusas por WhatsApp; con esta app puedes:
 
-### 2. Patrón de Arquitectura: MVVM (Model-View-ViewModel)
-La estructura del código divide de manera estricta las responsabilidades para asegurar mantenibilidad:
-* **Model (Modelo):** Definido por contratos de interfaces de TypeScript (ej. `Supermarket`, `UserProfile`) que estructuran las entidades de negocio, junto con los servicios (`authService`, `supermarketService`) encargados de interactuar con la capa de datos remota mediante peticiones `fetch`.
-* **View (Vista):** Pantallas y componentes funcionales (`HomeScreen`, `Header`, `FormAlerts`). Su rol es estrictamente pintar la interfaz de usuario basándose en los estados proveídos.
-* **ViewModel:** Centralizado dentro de los componentes funcionales mediante Hooks de React (`useState`, `useEffect`). Por ejemplo, la función `loadDashboardData` en `HomeScreen` actúa como el intermediario: despacha llamadas asíncronas en paralelo (`Promise.all`), encapsula el manejo de tokens de sesión, captura excepciones de red y muta estados reactivos de UI (`loading`, `errorMessages`).
+* 🏪 Ver los supermercados disponibles en tu zona y guardar tus favoritos.
+* 📦 Explorar pasillos organizados por categorías (Carnes, Verduras, Lácteos, etc.).
+* 💰 Ver precios reales en pesos dominicanos (RD$) y controlar tu presupuesto.
+* 🛒 Armar tu carrito de compras respetando el inventario real de la tienda.
+* 🚀 Configurar tu dirección de envío, método de pago y hacer tu pedido en segundos.
+* 🔔 Seguir el estado de tu orden en tiempo real mientras el comercio la prepara o el repartidor va en camino.
 
 ---
 
-## 🚀 Instalación y Configuración
+## 🛠️ Stack Tecnológico (¿Con qué se hizo?)
 
-### Prerrequisitos
-* Node.js (versión LTS recomendada)
-* pnpm instalado globalmente (`npm install -g pnpm`)
-* Expo Go instalado en un dispositivo físico o emulador configurado (Android Studio / Xcode)
+Para lograr una aplicación rápida y moderna, utilizamos las siguientes tecnologías:
 
-### Pasos para el Despliegue Local
-1.  Clonar el repositorio correspondiente al frontend.
-2.  Instalar las dependencias del proyecto utilizando el motor de enlaces rápidos:
-    ```bash
-    pnpm install
-    ```
-3.  Configurar las variables de entorno. Crear un archivo de configuración o modificar el punto de acceso de red en tus utilidades (`src/utils/storage` o constantes de servicios):
-    ```typescript
-    // Asegúrate de apuntar a la IP correcta de tu red local
-    export const API_URL = "http://192.168.1.15:4000"; 
-    ```
-4.  Iniciar el servidor de desarrollo de Expo:
-    ```bash
-    pnpm expo start
-    ```
-5.  Escanear el código QR desde la aplicación **Expo Go** en tu dispositivo móvil o presionar `a` para Android / `i` para iOS.
+* **React Native + Expo SDK:** Herramientas principales para crear la app móvil nativa.
+* **TypeScript:** Lenguaje de programación seguro que ayuda a prevenir errores de código.
+* **Expo Router:** Sistema encargado de manejar las pantallas y la navegación del usuario.
+* **pnpm:** Gestor de paquetes que acelera la instalación y descarga de dependencias.
+* **Almacenamiento Seguro:** Persistencia local para que mantengas tu sesión iniciada de forma privada.
 
 ---
 
-## 🔒 Manejo de Sesiones y Seguridad
-La aplicación recupera de forma asíncrona el JSON Web Token (JWT) almacenado en el inicio de sesión del usuario. 
-* Las peticiones críticas inyectan el token directamente en las cabeceras HTTP mediante el estándar Bearer:
-    ```typescript
-    Authorization: `Bearer ${token}`
-    ```
-* El componente `Header` procesa el nombre del usuario de manera segura en tiempo de ejecución. Cuenta con una función defensiva `obtenerIniciales` que previene fallos ante strings vacíos o nulos, calculando de manera dinámica el badge identificador (ej. "JR" para Juan Rodríguez) mediante segmentación de expresiones regulares (`/\s+/`).
+## 🚀 Instalación y Despliegue Local
 
----
+### 📥 Opción Rápida: Instalar el APK en tu Celular
+Si solo deseas probar la aplicación en tu dispositivo Android, puedes descargar e instalar directamente el instalador oficial aquí:
+👉 **[Descargar ExpressCart APK en Google Drive](https://drive.google.com/file/d/1kDWpfMAEU_-ODZfS0nrJ6Ca97g7a-rHg/view?usp=drivesdk)**
 
-## 🔍 Resolución de Problemas Comunes
-
-### Error: `fetch failed: java.net.ConnectException: Failed to connect to /192.168.1.15:4000`
-Este error se presenta cuando el dispositivo móvil o emulador no logra establecer comunicación de red con el backend.
-1.  **Verificación de Red:** Asegúrate de que tanto tu computadora (servidor backend) como tu celular estén conectados **exactamente a la misma red Wi-Fi**.
-2.  **Actualización de IP:** Las redes domésticas cambian la IP local periódicamente. Ejecuta `ipconfig` (Windows) o `ifconfig` (Mac/Linux) en tu terminal para obtener tu dirección IPv4 actual (ej. `192.168.1.18`) y reemplázala en la constante `API_URL` del frontend.
-3.  **Firewall:** Verifica que el puerto `4000` de tu computadora no esté bloqueado por políticas locales de seguridad.
+Equipo de Desarrollo
+Desarrollador Principal: Juan Diego Rodriguez Salas 100049553 Arianna Ventura 100067034 — Estudiantes de Ingeniería en Software, UAPA.
